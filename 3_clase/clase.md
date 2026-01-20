@@ -1,102 +1,129 @@
+## Clase 3 -> Subconsultas & DDL
+
 * [_Material de clase_](https://docs.google.com/presentation/d/1sEJj0T3u-4-DvFYFwYO25pjEI_Uc579GxWDzi31V37g/edit?slide=id.p1#slide=id.p1)
 
 
-## **RESUMEN COMPLETO - TEMAS SQL**
 
-### **1. UNION en SQL**
-- **Propósito**: Combinar resultados de múltiples consultas SELECT en un único conjunto.
-- **Requisitos**:
-  - Mismo número de columnas en todas las consultas.
-  - Tipos de datos compatibles en columnas correspondientes.
-  - Mismo orden de columnas (recomendado: mismos nombres).
-- **Variantes**:
-  - `UNION`: Elimina duplicados.
-  - `UNION ALL`: Incluye duplicados (más rápido).
-- **Ordenamiento**: `ORDER BY` se aplica al resultado final.
+## Resumen del material On Demand
+1. UNION – Combinar conjuntos de resultados
+2. Tipos de Datos – Los elementos fundamentales de SQL
+3. Subconsultas – Consultas dentro de consultas
+4. LIKE – Búsqueda con patrones de texto
+5. DDL – El lenguaje de definición de bases de datos
 
 ---
 
-### **2. Tipos de Datos en SQL**
-| Categoría           | Tipos Comunes                          | Uso Principal                          |
-|---------------------|----------------------------------------|----------------------------------------|
-| **Numéricos**       | INT, DECIMAL, FLOAT                    | Enteros, decimales precisos, cálculos científicos |
-| **Texto**           | CHAR, VARCHAR, TEXT                    | Textos de longitud fija/variable, contenido largo |
-| **Fecha/Hora**      | DATE, TIME, DATETIME                   | Almacenar fechas, horas o ambos        |
-| **Otros**           | BOOLEAN, BINARY                        | Valores lógicos, datos binarios        |
+## 1. UNION: Combinador de Resultados
+**Analogía:** Imagina dos listas de estudiantes (una de mañana, otra de tarde). UNION las une en una sola lista, eliminando nombres repetidos; UNION ALL los mantiene todos.
 
-**Consideraciones clave**:
-- Elegir tipo adecuado optimiza almacenamiento y rendimiento.
-- Verificar tipos disponibles según motor de base de datos (MySQL, SQL Server, etc.).
+### Concepto Clave:
+```sql
+-- Ejemplo Visual
+SELECT nombre FROM estudiantes_matutinos
+UNION
+SELECT nombre FROM estudiantes_vespertinos;
+```
 
----
+**Reglas Fundamentales:**
+- Mismo número y tipo de columnas en ambos SELECT
+- UNION = Sin duplicados (proceso más lento)
+- UNION ALL = Con duplicados (proceso más rápido)
 
-### **3. Subconsultas (Subqueries)**
-- **Definición**: Consulta dentro de otra consulta.
-- **Usos comunes**:
-  - Filtrar resultados con `WHERE` (ej: `WHERE salario > (SELECT AVG(salario)...)`).
-  - Como columna derivada en `SELECT`.
-  - Con operadores `IN`, `EXISTS`, `ANY/ALL`.
-- **Tipos**:
-  - **Correlacionadas**: Referencian columnas de la consulta externa.
-  - **Anidadas**: Subconsultas dentro de subconsultas.
+**Tip:**  Pensarlo como "sumar tablas verticalmente" en contraste con JOIN que es "unir tablas horizontalmente".
 
 ---
 
-### **4. Operador LIKE**
-- **Propósito**: Búsqueda de patrones en cadenas de texto.
-- **Comodines**:
-  - `%`: Cualquier número de caracteres.
-  - `_`: Un único carácter.
-- **Ejemplos**:
-  - `LIKE 'Al%'`: Empieza con "Al".
-  - `LIKE '%libro%'`: Contiene "libro".
-  - `LIKE '_a%@dominio.com'`: Patrón específico en email.
-- **Nota**: `%` al inicio puede afectar rendimiento (evita uso de índices).
+## 2. Tipos de Datos: Selección Apropiada
+**Analogía:** Elegir entre diferentes contenedores: pequeño (CHAR), ajustable (VARCHAR), o grande (TEXT).
+
+### Guía Rápida de Selección:
+| Tipo | Uso Principal | Ejemplo Práctico |
+|------|---------------|------------------|
+| INT | Números enteros | Cantidad: 15 unidades |
+| DECIMAL | Valores monetarios, medidas | Precio: $19.99 |
+| VARCHAR(100) | Texto de longitud variable | Nombre: "María González" |
+| DATE | Solo fechas | Fecha nacimiento: 1995-03-15 |
+| DATETIME | Fecha + hora exacta | Registro: 2024-01-20 14:30:00 |
+
+**Error Común:** Utilizar VARCHAR(255) para todos los campos de texto, lo que desperdicia espacio y afecta el rendimiento.
 
 ---
 
-### **5. DDL (Lenguaje de Definición de Datos)**
-- **Sentencias principales**:
-  - `CREATE`: Crear objetos (tablas, vistas, índices).
-    ```sql
-    CREATE TABLE Empleados (
-      id INT PRIMARY KEY,
-      nombre VARCHAR(100)
-    );
-    ```
-  - `ALTER`: Modificar estructura.
-    ```sql
-    ALTER TABLE Empleados ADD email VARCHAR(255);
-    ```
-  - `DROP`: Eliminar objetos.
-    ```sql
-    DROP TABLE Empleados;
-    ```
-- **Consideraciones**:
-  - Cambios son **permanentes** (usar con precaución).
-  - Controlar permisos de ejecución.
-  - Probar en entorno de desarrollo antes de producción.
+## 3. Subconsultas: Consultas Anidadas
+**Definición Simple:** Una consulta utilizada dentro de otra consulta.
+```sql
+-- Ejemplo: "Empleados que ganan más que el promedio"
+SELECT nombre, salario 
+FROM empleados 
+WHERE salario > (SELECT AVG(salario) FROM empleados);
+```
+
+### Dos Categorías Principales:
+1. **Correlacionadas:** Dependen de la consulta exterior
+2. **No Correlacionadas:** Se ejecutan independientemente una vez
+
+**Enfoque Pedagógico:** Iniciar con el operador IN por su mayor intuición:
+```sql
+-- "Productos vendidos en enero"
+SELECT * FROM productos 
+WHERE id IN (SELECT producto_id FROM ventas WHERE mes = 'Enero');
+```
 
 ---
 
-### **6. Estructura del Curso (Unidades 0-12)**
-**Temario principal**:
-- **Unidades 0-2**: Introducción, bases relacionales, sentencias SQL básicas.
-- **Unidades 3-6**: Subconsultas, DDL, objetos SQL, vistas, DML (manipulación de datos).
-- **Unidades 7-10**: Importación de datos, procedimientos almacenados, triggers, transacciones.
-- **Unidades 11-12**: Datawarehouse, Business Intelligence, IA con Azure SQL.
+## 4. LIKE: Búsqueda por Patrones
+**Analogía:** Similar al uso de comodines en búsqueda de archivos del sistema operativo.
 
-**Clases prácticas**: Semanales (ej: 20:30-22:30 hs), con grabaciones disponibles.
+| Comodín | Función | Ejemplo | Coincidencia |
+|---------|---------|---------|--------------|
+| % | Cualquier secuencia (0 o más caracteres) | 'Mar%' | María, Marcos |
+| _ | Exactamente un carácter (cualquiera) | '_aña' | Caña, Maña |
+
+**Consideración de Rendimiento:**
+```sql
+-- OPTIMO (usa índices): LIKE 'Juan%'
+-- INEFICIENTE (escaneo completo): LIKE '%Juan%'
+```
+
+**Ejemplo:** Buscar correos electrónicos por dominio:
+```sql
+SELECT email FROM usuarios WHERE email LIKE '%@gmail.com';
+-- Resultado: ana@gmail.com, pedro@gmail.com
+```
 
 ---
 
-## **CONSEJOS PRÁCTICOS**
-1. **Compatibilidad**: Verificar sintaxis específica del motor de base de datos.
-2. **Rendimiento**:
-   - Evitar `LIKE '%patrón'` en grandes volúmenes.
-   - Usar `UNION ALL` si no necesitas eliminar duplicados.
-3. **DDL**: Realizar backups antes de ejecutar `ALTER` o `DROP`.
+## 5. DDL: Lenguaje de Definición de Datos
+**Metáfora:** Si la base de datos fuera un edificio:
+- CREATE = Construir una nueva habitación
+- ALTER = Modificar una habitación existente
+- DROP = Demoler una habitación (operación crítica)
 
----
+### Los Tres Comandos Fundamentales:
+```sql
+-- 1. CREAR (estructura inicial)
+CREATE TABLE Estudiantes (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL
+);
 
-**Palabras clave**: `UNION`, `tipos de datos`, `subconsultas`, `LIKE`, `DDL`, `CREATE`, `ALTER`, `DROP`, `patrones`, `rendimiento`.
+-- 2. MODIFICAR (cambiar estructura)
+ALTER TABLE Estudiantes ADD COLUMN email VARCHAR(100);
+
+-- 3. ELIMINAR (remover completamente)
+DROP TABLE Estudiantes; -- OPERACION IRREVERSIBLE
+```
+
+**Principio de Seguridad:**
+"Nunca ejecutar DROP en entorno de producción sin backup previo. Es equivalente a eliminar permanentemente un documento crítico."
+
+
+## Glosario de Términos Esenciales
+| Término | Definición Concisa |
+|---------|-------------------|
+| UNION | Combinar resultados de múltiples consultas verticalmente |
+| Subconsulta | Consulta anidada dentro de otra consulta principal |
+| DDL | Lenguaje para definir estructuras de base de datos |
+| LIKE | Operador para búsqueda de patrones en cadenas de texto |
+| Tipo de dato | Especificación de cómo se almacena y trata cada información |
+
